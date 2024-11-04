@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>라이선스 대량등록</title>
+</head>
+<body>
+  <form th:action="@{/license}" method="post">
+    <label for="licenseNum">개수:
+      <input type="text" id="licenseNum" name="licenseNum"/>
+    </label>
+    </br>
+    <label for="startNum">시작 숫자:
+      <input type="text" id="startNum" name="startNum"/>
+    </label>
+    </br>
+    <label for="startNum">라이선스 타입:
+      ex) storybuilder, metaware, school, storymaker, bookclub, storybook
+      <input type="text" id="licenseType" name="licenseType" />
+    </label>
+    </br>
+    <label for="startNum">라이선스 등급:
+      ex)  tutor  class(기본), home, storybuilder, academy	story readers lv1~6
+      <input type="text" id="licenseGrade" name="licenseGrade"/>
+    </label>
+    </br>
+    <label for="startNum">이메일: (숫자기입 x, ex. test@vrware.us
+      <input type="text" id="email" name="email"/>
+    </label>
+    </br>
+    <label for="startNum">만료일:
+      <input type="text" id="expireDate" name="expireDate"/>
+    </label>
+    </br>
+    <label for="group">그룹: (ex. GP)
+      <input type="text" id="group" name="group"/>
+    </label>
+    </br>
+    <input type="submit">
+  </form>
+</body>
+</html>
