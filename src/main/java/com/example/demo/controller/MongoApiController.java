@@ -9,6 +9,7 @@ import com.example.demo.domain.LicenseMongoRepository;
 import com.example.demo.domain.Member;
 import com.example.demo.domain.MemberDto;
 import com.example.demo.domain.MemberMongoRepository;
+import com.example.demo.service.ApiService;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -56,6 +57,8 @@ public class MongoApiController {
 
 
 
+  private final ApiService apiService;
+
   @RequestMapping("/index")
   public String index() {
     return "index";
@@ -98,273 +101,48 @@ public class MongoApiController {
   }
 
   @PostMapping("/license")
-  public String testPost(@RequestBody LicenseDto dto) {
-
-    // 2개 테스트
-    List<LicenseDto> dtos;
-
-    dtos = getEmailDto(dto);
-
-    WebClient webClient =
-        WebClient.builder()
-            .baseUrl("https://api.vrware.us")
-            .build();
-
-    for (LicenseDto licenseDto : dtos) {
-      log.info("licenseDto.getEmail()={}", licenseDto.getEmail());
-
-      String licenseMono = webClient.post()
-          .uri("/api/v1.1/licenses")
-          .bodyValue(licenseDto)
-          .headers(httpHeaders -> {
-            httpHeaders.add("clientId", "VAHQA1PIWDZQ7OHFNQFJ");
-            httpHeaders.add("clientSecretKey", "o1M176Dmbcx05cqyV2sVRZktdx6wmwBK3Lpas0Ck");
-          })
-          .retrieve()
-          .onStatus(status -> status.is4xxClientError(), clientResponse -> {
-            if (clientResponse.statusCode() == HttpStatus.NOT_FOUND) {
-              return Mono.error(new RuntimeException("Resource not found"));
-            }
-            return Mono.error(new RuntimeException("Client error"));
-          })
-          .bodyToMono(String.class)
-          .block();
-
-
-
-    }
-
-    return null;
-
+  public ResponseEntity<String> licenseInsertApi(@RequestBody LicenseDto dto) {
+    return ResponseEntity.ok(apiService.licenseInsertApi(dto));
   }
 
 
   @Transactional
   @PatchMapping("/password")
-  public String passwordChange(@RequestBody MemberDto dto) {
-    // 2개 테스트
-    List<LicenseDto> dtos = new ArrayList<>();
-    String front = dto.email().split("@")[0];
-    String after = dto.email().split("@")[1];
-
-    if (dto.memberNum() != 1) {
-      for (int i = 0; i < dto.memberNum(); i++) {
-        LicenseDto dto2 = new LicenseDto();
-
-        if(dto.type().equals("00")) {
-
-          if (dto.startNum() + i < 10) {
-            dto2.setEmail(front + "0" + (dto.startNum() + i) + "@" + after);
-          } else {
-            // 10~ 1000 이상
-            dto2.setEmail(front + (dto.startNum() + i) + "@" + after);
-          }
-
-        }else {
-
-          if (dto.startNum()+i < 10) {
-            dto2.setEmail(front + "00" + (dto.startNum() + i) + "@" + after);
-          } else if (dto.startNum()+i < 100) {
-            // 100 보다 작을때
-            dto2.setEmail(front + "0" + (dto.startNum() + i) + "@" + after);
-          } else {
-            // 100~ 1000 이상
-            dto2.setEmail(front + (dto.startNum() + i) + "@" + after);
-          }
-
-        }
-        dtos.add(dto2);
-      }
-    } else {
-      // 변경할 게 한개인 경우
-      if(dto.memberNum() == 1){
-        String ecodePw = passwordEncoder.encode(dto.changePassword());
-        Query query = new Query(Criteria.where("email").is(dto.email()));
-        Update update = new Update().set("password", ecodePw);
-        mongoTemplate.updateFirst(query, update, Member.class);
-
-      }
-      return null;
-
-    }
-
-    for (LicenseDto licenseDto : dtos) {
-
-      String ecodePw = passwordEncoder.encode(dto.changePassword());
-      Query query = new Query(Criteria.where("email").is(licenseDto.getEmail()));
-      Update update = new Update().set("password", ecodePw);
-
-      mongoTemplate.updateFirst(query, update, Member.class);
-
-    }
-
-    return null;
+  public ResponseEntity<String> passwordChange(@RequestBody MemberDto dto) {
+    return ResponseEntity.ok(apiService.changePassword(dto));
   }
 
 
   @Transactional
   @PatchMapping("/license")
-  public String licenseChange(@RequestBody LicenseDto dto) {
-    // 2개 테스트
-    List<LicenseDto> dtos;
-
-    if (dto.getLicenseNum() != 1) {
-      dtos = getEmailDto(dto);
-    } else {
-      // 변경할 게 한개인 경우
-      if(dto.getLicenseNum() == 1){
-        log.info("email={}" + dto.getEmail());
-        log.info("dto = {}"+ dto.getLicenseType());
-
-        License license = getLicense(dto.getEmail(), dto.getLicenseType(),dto.getLicenseGrade());
-        license.gradeChange(dto.getChangeGrade());
-
-        licneseMongoRepository.save(license);
-
-      }
-      return null;
-
-    }
-
-    for (LicenseDto licenseDto : dtos) {
-
-      License license = getLicense(licenseDto.getEmail(), dto.getLicenseType(),dto.getLicenseGrade());
-      log.info("id={}", license.getId());
-      log.info("nickname={}", license.getLicenseGrade());
-      log.info("nickname={}", license.getType());
-
-      license.gradeChange(dto.getChangeGrade());
-
-      licneseMongoRepository.save(license);
-    }
-
-    return null;
+  public ResponseEntity<String> licenseChange(@RequestBody LicenseDto dto) {
+    return ResponseEntity.ok(apiService.licenseChange(dto));
   }
 
 
-  public List<LicenseDto> getEmailDto(LicenseDto dto){
+  // 라이선스 코드 입력
 
-    List<LicenseDto> dtos = new ArrayList<>();
-    String front = dto.getEmail().split("@")[0];
-    String after = dto.getEmail().split("@")[1];
-
-    for (int i = 0; i < dto.getLicenseNum(); i++) {
-      LicenseDto dto2 = new LicenseDto();
-
-      if(dto.getType().equals("00")) {
-
-        if (dto.getStartNum() + i < 10) {
-          dto2.setEmail(front + "0" + (dto.getStartNum() + i) + "@" + after);
-          dto2.setNickName(dto.getNickName()+ "0" + (dto.getStartNum() + i));
-        } else {
-          // 10~ 1000 이상
-          dto2.setEmail(front + (dto.getStartNum() + i) + "@" + after);
-          dto2.setNickName(dto.getNickName() + (dto.getStartNum() + i));
-        }
-
-      }else {
-
-        if (dto.getStartNum()+i < 10) {
-          dto2.setEmail(front + "00" + (dto.getStartNum() + i) + "@" + after);
-          dto2.setNickName(dto.getNickName()+ "00" + (dto.getStartNum() + i));
-        } else if (dto.getStartNum()+i < 100) {
-          // 100 보다 작을때
-          dto2.setEmail(front + "0" + (dto.getStartNum() + i) + "@" + after);
-          dto2.setNickName(dto.getNickName()+ "0" + (dto.getStartNum() + i));
-        } else {
-          // 100~ 1000 이상
-          dto2.setEmail(front + (dto.getStartNum() + i) + "@" + after);
-          dto2.setNickName(dto.getNickName() + (dto.getStartNum() + i));
-        }
-
-      }
-
-      log.info("00 email" + dto2.getEmail());
-      dto2.setGroup(dto.getGroup());
-      dto2.setExpireDate(dto.getExpireDate());
-      dto2.setLicenseGrade(dto.getLicenseGrade());
-      dto2.setLicenseType(dto.getLicenseType());
-      dto2.setChangeGrade(dto.getChangeGrade());
-
-
-      dtos.add(dto2);
-    }
-    return dtos;
+  @PostMapping("/license-mongo")
+  public ResponseEntity<String> licenseInsertDB(@RequestBody LicenseDto dto) {
+   return ResponseEntity.ok(apiService.licenseInsertDB(dto));
   }
+
 
 
 
   @Transactional
   @PatchMapping("/date-change")
-  public String licenseDueChange(@RequestBody LicenseDto dto) {
-    // 2개 테스트
-    List<LicenseDto> dtos;
+  public ResponseEntity<String> licenseDueChange(@RequestBody LicenseDto dto) {
 
-    if (dto.getLicenseNum() != 1) {
-     dtos = getEmailDto(dto);
-    } else {
-      // 변경할 게 한개인 경우
 
-        log.info("email={}" + dto.getEmail());
-        log.info("dto = {}"+ dto.getLicenseType());
-
-        License license = getLicense(dto.getEmail(), dto.getLicenseType(),dto.getLicenseGrade());
-        license.expireDateChange(dto.getExpireDate());
-
-        licneseMongoRepository.save(license);
-
-      return null;
-
-    }
-
-    for (LicenseDto licenseDto : dtos) {
-
-      License license = getLicense(licenseDto.getEmail(), dto.getLicenseType(), dto.getLicenseGrade());
-      log.info("id={}", license.getId());
-      log.info("nickname={}", license.getLicenseGrade());
-      log.info("nickname={}", license.getType());
-
-      license.expireDateChange(dto.getExpireDate());
-
-      licneseMongoRepository.save(license);
-    }
-
-    return null;
+    return ResponseEntity.ok(apiService.licenseDueChange(dto));
   }
 
 
   @Transactional
   @DeleteMapping("/license")   // 쓰지 말아봐바 이거 하고 라이선스 추가가 안되네 ;;; 하 열북게 증말
-  public String licenseDel(@RequestBody LicenseDto dto) {
-    // 2개 테스트
-    List<LicenseDto> dtos;
-
-    if (dto.getLicenseNum() != 1) {
-      dtos = getEmailDto(dto);
-    } else {
-      // 변경할 게 한개인 경우
-      if(dto.getLicenseNum() == 1){
-        log.info("email={}" + dto.getEmail());
-        log.info("dto = {}"+ dto.getLicenseType());
-
-        List<License> license = getLicense(dto.getEmail(), dto.getLicenseType());
-
-        licneseMongoRepository.deleteAll(license);
-
-      }
-      return null;
-
-    }
-
-    for (LicenseDto licenseDto : dtos) {
-
-      List<License> license = getLicense(licenseDto.getEmail(), dto.getLicenseType());
-
-      licneseMongoRepository.deleteAll(license);
-
-    }
-
-    return null;
+  public ResponseEntity<String> licenseDel(@RequestBody LicenseDto dto) {
+    return ResponseEntity.ok(apiService.licenseDueChange(dto));
   }
 
 
@@ -417,8 +195,6 @@ public class MongoApiController {
     }
 
 
-//    return licenseCodeMongoRepository.save(dto.toEntity()).getId();
-
     return ResponseEntity.ok(columnData);
 
   }
@@ -455,9 +231,6 @@ public class MongoApiController {
 
     }
 
-
-//    return licenseCodeMongoRepository.save(dto.toEntity()).getId();
-
     return ResponseEntity.ok(columnData);
 
   }
@@ -466,51 +239,11 @@ public class MongoApiController {
 
   @Transactional
   @PostMapping("/nickname")
-  public String ninckNamePost(@RequestBody LicenseDto dto) {
+  public ResponseEntity<String> ninckNamePost(@RequestBody LicenseDto dto) {
 
-    // 2개 테스트
-    List<LicenseDto> dtos;
-
-    dtos = getEmailDto(dto);
-
-
-    for (LicenseDto licenseDto : dtos) {
-
-        Query query = new Query(Criteria.where("email").is(licenseDto.getEmail()));
-        Update update = new Update().set("nickname", licenseDto.getNickName());
-
-        mongoTemplate.updateFirst(query, update, Member.class);
-
-    }
-
-    return null;
+    return ResponseEntity.ok(apiService.nickNameInsert(dto));
 
   }
 
-
-
-
-
-
-
-
-  public Member getMemberByEmail(String email) {
-    return memberMongoRepository.findByEmail(email);
-  }
-
-
-  public List<License> getLicense(String email, String type) {
-    return licneseMongoRepository.findByEmailAndType(email, type );
-  }
-
-
-  public License getLicense(String email, String type, String grade) {
-    return licneseMongoRepository.findByEmailAndTypeAndLicenseGrade(email, type,grade);
-  }
-
-  public List<License> getEmail(String email) {
-    log.info("email={}",email);
-    return licneseMongoRepository.findByEmail(email);
-  }
 
 }

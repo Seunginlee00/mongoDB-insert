@@ -16,6 +16,7 @@ public class LicenseDto {
   private String email;
   private LocalDate expireDate;
   private String group;
+  private Integer __v;
 
 
 

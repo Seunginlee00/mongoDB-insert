@@ -27,6 +27,7 @@ public class License {
   private String licenseCode;
   private String typee;
   private String licenseGradee;
+  private Integer __v;
 
   public void typeChange(String type){
     this.typee = type;
