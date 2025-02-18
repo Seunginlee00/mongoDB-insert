@@ -6,7 +6,6 @@ import com.example.demo.domain.LicenseCodeDto;
 import com.example.demo.domain.LicenseCodeMongoRepository;
 import com.example.demo.domain.LicenseDto;
 import com.example.demo.domain.LicenseMongoRepository;
-import com.example.demo.domain.Member;
 import com.example.demo.domain.MemberDto;
 import com.example.demo.domain.MemberMongoRepository;
 import com.example.demo.service.ApiService;
@@ -22,9 +21,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -146,6 +142,13 @@ public class MongoApiController {
   }
 
 
+  @Transactional
+  @DeleteMapping("/license2")   // 쓰지 말아봐바 이거 하고 라이선스 추가가 안되네 ;;; 하 열북게 증말
+  public ResponseEntity<String> licenseDel2(@RequestBody LicenseDto dto) {
+    return ResponseEntity.ok(apiService.licenseDel2(dto));
+  }
+
+
 
 
   @PostMapping(value = "/license-code")
@@ -242,6 +245,15 @@ public class MongoApiController {
   public ResponseEntity<String> ninckNamePost(@RequestBody LicenseDto dto) {
 
     return ResponseEntity.ok(apiService.nickNameInsert(dto));
+
+  }
+
+
+  @Transactional
+  @PostMapping("/user")
+  public ResponseEntity<String> createUser(@RequestBody MemberDto dto) {
+
+    return ResponseEntity.ok(apiService.createUser(dto));
 
   }
 
