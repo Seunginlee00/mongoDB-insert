@@ -11,9 +11,9 @@ spring:
     allow-bean-definition-overriding: true
   data:
     mongodb:
-      host: 133.186.217.162
+      host: 호스트IP
       port: 25015
-      username: globepoint
+      username: ID
       authentication-database: admin
-      password: globep0int
-      database: vrware_member
+      password: PW
+      database: DB
