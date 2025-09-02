@@ -180,7 +180,7 @@ public class ApiService {
 
     WebClient webClient =
         WebClient.builder()
-            .baseUrl("https://api.vrware.us")
+            .baseUrl("도메인")
             .build();
 
     for (LicenseDto licenseDto : dtos) {
@@ -190,8 +190,6 @@ public class ApiService {
           .uri("/api/v1.1/licenses")
           .bodyValue(licenseDto)
           .headers(httpHeaders -> {
-            httpHeaders.add("clientId", "VAHQA1PIWDZQ7OHFNQFJ");
-            httpHeaders.add("clientSecretKey", "o1M176Dmbcx05cqyV2sVRZktdx6wmwBK3Lpas0Ck");
           })
           .retrieve()
           .onStatus(status -> status.is4xxClientError(), clientResponse -> {
