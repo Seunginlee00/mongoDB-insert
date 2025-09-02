@@ -19,7 +19,7 @@ public class CorsConfig {
     config.setAllowedHeaders(Collections.singletonList("*"));
     config.setAllowedMethods(Collections.singletonList("*"));
     config.setAllowedOrigins(
-        List.of("http://localhost:3000", "http://localhost:8080", "https://api.vrware.us" ));
+        List.of("http://localhost:3000", "http://localhost:8080", "도메인" ));
 
     config.setAllowCredentials(true);
     config.setExposedHeaders(Arrays.asList("Authorization","Set-Cookie"));
