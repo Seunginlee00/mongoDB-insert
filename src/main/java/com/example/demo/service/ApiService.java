@@ -363,8 +363,6 @@ public class ApiService {
       list.add(newLicense);
     }
 
-    //  이유는 모르겠으나.. 저렇게 return 값 주고 또 됨... 하.. 모르겠네..
-    // nosql이라 값을 지우고 다시 넣다보면 좀 뭔가 꼬이는건지.. 아니면 return이 꼭 있어야하는건지..
 
     return licneseMongoRepository.saveAll(list).get(0).getId();
   }
