@@ -66,20 +66,18 @@ public class MongoApiController {
 
     WebClient webClient =
         WebClient.builder()
-            .baseUrl("https://api.vrware.us")
+            .baseUrl("도메인")
             .build();
 
 // 빌더
-    String baseUrl = "https://api.vrware.us";
+    String baseUrl = "도메인";
 
     Mono<License> licenseMono = webClient.get()
         .uri(builder -> builder
             .path("/api/v1.1/licenses")
-            .queryParam("email", "si.lee@globepoint.co.kr")
+            .queryParam("email", "이메일")
             .build())
         .headers(httpHeaders -> {
-          httpHeaders.add("clientId", "VAHQA1PIWDZQ7OHFNQFJ");
-          httpHeaders.add("clientSecretKey", "o1M176Dmbcx05cqyV2sVRZktdx6wmwBK3Lpas0Ck");
         })
         .retrieve()
         .onStatus(status -> status.is4xxClientError(), clientResponse -> {
